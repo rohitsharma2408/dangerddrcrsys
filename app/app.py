@@ -65,16 +65,9 @@ def recommend(movie_title, movies, similarity):
     ]
 
 
-st.set_page_config(
-    page_title="Movie Recommendation System",
-    layout="wide",
-)
-
+st.set_page_config(page_title="Movie Recommendation System", layout="wide")
 st.title("Movie Recommendation System")
-st.write(
-    "A content-based recommender built from movie metadata "
-    "using CountVectorizer and cosine similarity."
-)
+st.write("A content-based recommender using CountVectorizer and cosine similarity.")
 
 api_key = get_tmdb_api_key()
 
@@ -82,10 +75,7 @@ try:
     movies, similarity = load_model()
 except FileNotFoundError as error:
     st.error(f"Required model artifact is missing: {error.filename}")
-    st.info(
-        "Run the model-generation notebook to create the required artifacts "
-        "before starting the Streamlit application."
-    )
+    st.info("Run the model-generation notebook before starting the application.")
     st.stop()
 
 selected_movie = st.selectbox(
