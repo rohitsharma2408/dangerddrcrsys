@@ -1,10 +1,10 @@
 <div align="center">
 
-# 🎬 CineMatch
+# 🎬 Movie Recommender System
 
-### **Content-Based Movie Recommendation System**
+### **Content-Based Movie Recommendation Engine**
 
-**Pick a movie you love → CineMatch finds five movies with the closest content profile.**
+**Select a movie you like → discover five movies with the most similar content profile.**
 
 [![Python](https://img.shields.io/badge/Python-3.x-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
@@ -15,126 +15,112 @@
 
 ---
 
-## 🍿 What is CineMatch?
+## 📌 Project Overview
 
-CineMatch is a **content-based recommendation engine** built from the TMDB 5000 Movie Dataset.
+The **Movie Recommender System** is a content-based recommendation engine built with the **TMDB 5000 Movie Dataset**.
 
-Instead of relying on user ratings, it asks:
+Rather than relying on user ratings or collaborative behavior, the system recommends movies based on **content similarity**. Each movie is represented using its:
 
-> **“What movies look most similar to this movie?”**
+- 🎞️ Overview
+- 🎭 Genres
+- 🔑 Keywords
+- 👥 Top cast
+- 🎬 Director
 
-The system combines a movie's **plot, genres, keywords, top cast, and director** into a single content representation, converts that representation into numerical vectors, and ranks movies using **cosine similarity**.
-
----
-
-## 🎥 Architecture
-
-<img src="assets/architecture.svg" alt="CineMatch recommendation architecture" width="100%"/>
+These features are combined into a text representation, processed with NLP techniques, converted into numerical vectors, and compared using **cosine similarity**.
 
 ---
 
-## ⚡ The pipeline
+## 🏗️ System Architecture
 
-| Stage | What happens |
+<img src="assets/architecture.svg" alt="Movie Recommender System architecture" width="100%"/>
+
+---
+
+## ⚙️ Recommendation Pipeline
+
+| Stage | Implementation |
 |---|---|
-| 🎞️ **Data** | TMDB movies + credits are merged |
-| 🧩 **Features** | Overview, genres, keywords, cast, director |
-| 🧹 **Preprocessing** | Structured fields are parsed and text is normalized |
-| 🌱 **Stemming** | Porter Stemmer reduces word variants |
-| 🔤 **Vectorization** | CountVectorizer → up to 5,000 features |
-| 📐 **Similarity** | Cosine similarity between movie vectors |
-| 🏆 **Ranking** | Highest-scoring movies become recommendations |
-| 🌐 **Presentation** | TMDB provides posters for the Streamlit UI |
+| **Data ingestion** | TMDB 5000 movies + credits |
+| **Data integration** | Merge movie metadata with credits |
+| **Feature engineering** | Overview, genres, keywords, cast, director |
+| **Text preprocessing** | Lowercasing + Porter stemming |
+| **Vectorization** | CountVectorizer with up to 5,000 features |
+| **Similarity engine** | Cosine similarity |
+| **Recommendation** | Rank nearest content profiles |
+| **Presentation** | Streamlit + TMDB poster API |
 
-### The numbers
+### Key dimensions
 
 **4,809** merged records  
 → **4,806** final recommendation records  
 → **5,000** maximum text features  
-→ **4,806 × 4,806** similarity matrix
+→ **4,806 × 4,806** precomputed similarity matrix
 
 ---
 
-## 🧠 How one recommendation is produced
+## 🧠 How Recommendations Work
 
-~~~text
-                 USER
-                  │
-                  ▼
-          Selects a movie
-                  │
-                  ▼
-       ┌────────────────────┐
-       │   Movie profile    │
-       │                    │
-       │ Overview           │
-       │ Genres             │
-       │ Keywords           │
-       │ Cast               │
-       │ Director           │
-       └─────────┬──────────┘
-                 │
-                 ▼
-          Text representation
-                 │
-                 ▼
-       CountVectorizer (5K)
-                 │
-                 ▼
-        Cosine similarity
-                 │
-                 ▼
-       Rank all other movies
-                 │
-                 ▼
-             TOP 5 🎬
-                 │
-                 ▼
-           TMDB posters
-                 │
-                 ▼
-          Streamlit UI
-~~~
+For a selected movie, the application:
 
----
+1. Finds the movie in the processed metadata.
+2. Retrieves its corresponding row from the similarity matrix.
+3. Compares it against every other movie.
+4. Sorts movies by similarity score.
+5. Excludes the selected movie itself.
+6. Returns the **top 5 recommendations**.
+7. Uses TMDB to retrieve poster artwork for the results.
 
-## 🎯 Recommendation logic
+The core similarity operation is:
 
-The model uses **content-based filtering**.
-
-For a selected movie:
-
-1. Locate the movie in the processed dataframe.
-2. Retrieve its row from the precomputed similarity matrix.
-3. Pair movie indices with similarity scores.
-4. Sort scores from highest to lowest.
-5. Skip the selected movie itself.
-6. Return the first five matches.
-
-The similarity calculation is based on:
-
-~~~python
+```python
 cosine_similarity(vectors)
-~~~
+```
 
-The text representation is created with:
+The text representation is generated using:
 
-~~~python
+```python
 CountVectorizer(
     max_features=5000,
     stop_words="english"
 )
-~~~
+```
 
 ---
 
-## 🌐 TMDB is only the presentation layer
+## 🔄 Inference Flow
 
-The recommendation model decides **which movies** are similar.
+```text
+User selects a movie
+        │
+        ▼
+Processed movie metadata
+        │
+        ▼
+Precomputed similarity matrix
+        │
+        ▼
+Rank similarity scores
+        │
+        ▼
+Top 5 recommendations
+        │
+        ▼
+TMDB poster lookup
+        │
+        ▼
+Streamlit interface
+```
 
-TMDB is then used to retrieve **poster artwork** for those recommended movies.
+---
 
-~~~text
+## 🌐 TMDB Integration
+
+TMDB is used as a **presentation/enrichment layer**, not as the recommendation engine.
+
+The recommendation model determines **which movies are similar**. The TMDB API is then used to retrieve poster artwork using each movie's ID.
+
+```text
 Recommendation Model
         │
         └── Movie IDs
@@ -145,36 +131,36 @@ Recommendation Model
               └── Poster images
                     │
                     ▼
-                Streamlit
-~~~
+                Streamlit UI
+```
 
-🔐 **The TMDB API key should never be hard-coded or committed.**
+🔐 **The TMDB API key is never hard-coded.** Configure it through an environment variable or Streamlit secrets.
 
 ---
 
 ## 📊 Dataset
 
-The project uses the **TMDB 5000 Movie Dataset**:
+This project uses the **TMDB 5000 Movie Dataset**:
 
 - `tmdb_5000_movies.csv`
 - `tmdb_5000_credits.csv`
 
-The dataset itself is **not committed** to this repository.
+The dataset is **not committed to the repository**.
 
 Place both files inside `data/` before running the model-building script.
 
 ---
 
-## 🗂️ Repository structure
+## 🗂️ Repository Structure
 
-~~~text
+```text
 dangerddrcrsys/
 │
 ├── app/
 │   └── app.py                  # Streamlit application
 │
 ├── assets/
-│   └── architecture.svg        # Project architecture
+│   └── architecture.svg        # System architecture
 │
 ├── data/
 │   └── README.md               # Dataset instructions
@@ -183,106 +169,112 @@ dangerddrcrsys/
 │   └── movie_recommendation.ipynb
 │
 ├── scripts/
-│   └── build_model.py          # Rebuild recommendation artifacts
+│   └── build_model.py          # Model-building pipeline
 │
 ├── movie_dict.pkl              # Processed movie metadata
-├── similarity_1.pkl            # Generated similarity matrix
+├── similarity_1.pkl            # Precomputed similarity matrix
 │
 ├── .gitignore
 ├── requirements.txt
 └── README.md
-~~~
+```
 
-> **Note:** `similarity_1.pkl` is generated by the model-building script and is currently required by the Streamlit application.
+> **Note:** The similarity artifact is generated by `scripts/build_model.py` and is required by the Streamlit application.
 
 ---
 
-## 🚀 Run locally
+## 🚀 Run Locally
 
-### 1 · Install
+### 1. Clone and install dependencies
 
-~~~bash
+```bash
 git clone https://github.com/rohitsharma2408/dangerddrcrsys.git
 cd dangerddrcrsys
 pip install -r requirements.txt
-~~~
+```
 
-### 2 · Add the dataset
+### 2. Add the dataset
 
-Place:
-
-~~~text
+```text
 data/
 ├── tmdb_5000_movies.csv
 └── tmdb_5000_credits.csv
-~~~
+```
 
-### 3 · Build the model
+### 3. Build the recommendation artifacts
 
-~~~bash
+```bash
 python scripts/build_model.py
-~~~
+```
 
 This generates:
 
-~~~text
+```text
 movie_dict.pkl
 similarity_1.pkl
-~~~
+```
 
-### 4 · Configure TMDB
-
-For local development, set:
+### 4. Configure TMDB
 
 **Windows PowerShell**
 
-~~~powershell
+```powershell
 $env:TMDB_API_KEY="your_api_key"
-~~~
+```
 
 **Linux / macOS**
 
-~~~bash
+```bash
 export TMDB_API_KEY="your_api_key"
-~~~
+```
 
-For Streamlit deployment, use `.streamlit/secrets.toml`:
+For Streamlit deployment, use:
 
-~~~toml
+```toml
 TMDB_API_KEY = "your_api_key"
-~~~
+```
 
-### 5 · Launch CineMatch
+### 5. Launch the application
 
-~~~bash
+```bash
 streamlit run app/app.py
-~~~
+```
 
 ---
 
-## 🛠️ Tech stack
+## 🛠️ Technology Stack
 
 **Python** · **Pandas** · **NumPy** · **NLTK** · **Scikit-learn** · **Streamlit** · **Requests** · **TMDB API**
 
+### Core ML / NLP concepts
+
+- Content-based filtering
+- Feature engineering
+- Text preprocessing
+- Porter stemming
+- Bag-of-words representation
+- Cosine similarity
+- Precomputed similarity retrieval
+
 ---
 
-## 🔭 Roadmap
+## 🔭 Future Improvements
 
 - [ ] 🔎 Search-based movie selection
-- [ ] ⭐ Ratings and movie details
-- [ ] 🎭 Genre / actor / director filters
-- [ ] 💡 “Why was this recommended?” explanations
-- [ ] 🧹 Better duplicate-title handling
+- [ ] 🎭 Genre, actor, and director filters
+- [ ] ⭐ Movie ratings and detailed metadata
+- [ ] 💡 Explain why each movie was recommended
+- [ ] 🧹 Better handling of duplicate titles
 - [ ] 🤝 Hybrid content + collaborative filtering
 - [ ] 📏 Recommendation evaluation metrics
-- [ ] 🚀 Cleaner production deployment
+- [ ] 🚀 Production deployment
 
 ---
 
 <div align="center">
 
-### 🎬 Built by Rohit Sharma
+### 🎬 Movie Recommender System
 
-**Machine Learning · Data Science · Computational Bioengineering**
+**Built by Rohit Sharma · Machine Learning · Data Science**
 
 </div>
