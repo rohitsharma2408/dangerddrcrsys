@@ -1,187 +1,288 @@
-# Movie Recommendation System
+<div align="center">
 
-A content-based movie recommendation system built with Python and Streamlit using the TMDB 5000 Movie Dataset.
+# 🎬 CineMatch
 
-## Overview
+### **Content-Based Movie Recommendation System**
 
-This project recommends movies based on similarity between their metadata.
+**Pick a movie you love → CineMatch finds five movies with the closest content profile.**
 
-The pipeline combines:
+[![Python](https://img.shields.io/badge/Python-3.x-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Scikit--learn](https://img.shields.io/badge/scikit--learn-ML-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![TMDB](https://img.shields.io/badge/TMDB-API-01D277?style=for-the-badge&logo=themoviedatabase&logoColor=white)](https://www.themoviedb.org/)
 
-- Movie overview
-- Genres
-- Keywords
-- Top cast members
-- Director
+</div>
 
-These fields are combined into a single text representation, transformed with CountVectorizer, and compared using cosine similarity.
+---
 
-The Streamlit application lets a user select a movie and returns five similar movies with posters retrieved from TMDB.
+## 🍿 What is CineMatch?
 
-## Architecture
+CineMatch is a **content-based recommendation engine** built from the TMDB 5000 Movie Dataset.
 
-```text
-TMDB 5000 Dataset
-        |
-        v
-Data Cleaning & Feature Extraction
-        |
-        v
-Metadata Tags
-(overview + genres + keywords + cast + director)
-        |
-        v
-Text Preprocessing & Stemming
-        |
-        v
-CountVectorizer
-(5,000 features)
-        |
-        v
-Cosine Similarity
-        |
-        v
-Recommendation Engine
-        |
-        v
-Streamlit Application
-        |
-        v
-TMDB Poster API
-```
+Instead of relying on user ratings, it asks:
 
-## Methodology
+> **“What movies look most similar to this movie?”**
 
-### 1. Data Preparation
+The system combines a movie's **plot, genres, keywords, top cast, and director** into a single content representation, converts that representation into numerical vectors, and ranks movies using **cosine similarity**.
 
-The TMDB movies and credits datasets are merged using the movie identifier.
+---
 
-Structured JSON-like fields are parsed to extract useful metadata.
+## 🎥 Architecture
 
-### 2. Feature Engineering
+<img src="assets/architecture.svg" alt="CineMatch recommendation architecture" width="100%"/>
 
-The recommendation profile for each movie is built from:
+---
 
-```text
-tags = overview + genres + keywords + cast + director
-```
+## ⚡ The pipeline
 
-The resulting tags are normalized and stemmed using NLTK's Porter Stemmer.
+| Stage | What happens |
+|---|---|
+| 🎞️ **Data** | TMDB movies + credits are merged |
+| 🧩 **Features** | Overview, genres, keywords, cast, director |
+| 🧹 **Preprocessing** | Structured fields are parsed and text is normalized |
+| 🌱 **Stemming** | Porter Stemmer reduces word variants |
+| 🔤 **Vectorization** | CountVectorizer → up to 5,000 features |
+| 📐 **Similarity** | Cosine similarity between movie vectors |
+| 🏆 **Ranking** | Highest-scoring movies become recommendations |
+| 🌐 **Presentation** | TMDB provides posters for the Streamlit UI |
 
-### 3. Vectorization
+### The numbers
 
-CountVectorizer converts the text representation into a numerical feature matrix.
+**4,809** merged records  
+→ **4,806** final recommendation records  
+→ **5,000** maximum text features  
+→ **4,806 × 4,806** similarity matrix
 
-The original model uses:
+---
 
-- Maximum features: 5,000
-- English stop-word removal
+## 🧠 How one recommendation is produced
 
-### 4. Similarity
+~~~text
+                 USER
+                  │
+                  ▼
+          Selects a movie
+                  │
+                  ▼
+       ┌────────────────────┐
+       │   Movie profile    │
+       │                    │
+       │ Overview           │
+       │ Genres             │
+       │ Keywords           │
+       │ Cast               │
+       │ Director           │
+       └─────────┬──────────┘
+                 │
+                 ▼
+          Text representation
+                 │
+                 ▼
+       CountVectorizer (5K)
+                 │
+                 ▼
+        Cosine similarity
+                 │
+                 ▼
+       Rank all other movies
+                 │
+                 ▼
+             TOP 5 🎬
+                 │
+                 ▼
+           TMDB posters
+                 │
+                 ▼
+          Streamlit UI
+~~~
 
-Cosine similarity is calculated between every movie vector.
+---
 
-For a selected movie, the system ranks all other movies by similarity score and returns the top five.
+## 🎯 Recommendation logic
 
-## Dataset
+The model uses **content-based filtering**.
 
-The project uses the TMDB 5000 Movie Dataset containing movie metadata and credits.
+For a selected movie:
 
-The original notebook was developed in Kaggle and therefore contains Kaggle-specific input paths. The notebook should be run with the dataset available at those paths or updated to point to a local data directory.
+1. Locate the movie in the processed dataframe.
+2. Retrieve its row from the precomputed similarity matrix.
+3. Pair movie indices with similarity scores.
+4. Sort scores from highest to lowest.
+5. Skip the selected movie itself.
+6. Return the first five matches.
 
-The merged dataset contains approximately 4,809 movies, with 4,806 records used in the final recommendation dataframe.
+The similarity calculation is based on:
 
-## Project Structure
+~~~python
+cosine_similarity(vectors)
+~~~
 
-```text
+The text representation is created with:
+
+~~~python
+CountVectorizer(
+    max_features=5000,
+    stop_words="english"
+)
+~~~
+
+---
+
+## 🌐 TMDB is only the presentation layer
+
+The recommendation model decides **which movies** are similar.
+
+TMDB is then used to retrieve **poster artwork** for those recommended movies.
+
+~~~text
+Recommendation Model
+        │
+        └── Movie IDs
+              │
+              ▼
+          TMDB API
+              │
+              └── Poster images
+                    │
+                    ▼
+                Streamlit
+~~~
+
+🔐 **The TMDB API key should never be hard-coded or committed.**
+
+---
+
+## 📊 Dataset
+
+The project uses the **TMDB 5000 Movie Dataset**:
+
+- `tmdb_5000_movies.csv`
+- `tmdb_5000_credits.csv`
+
+The dataset itself is **not committed** to this repository.
+
+Place both files inside `data/` before running the model-building script.
+
+---
+
+## 🗂️ Repository structure
+
+~~~text
 dangerddrcrsys/
+│
 ├── app/
-│   └── app.py
-├── movie_dict.pkl
+│   └── app.py                  # Streamlit application
+│
+├── assets/
+│   └── architecture.svg        # Project architecture
+│
+├── data/
+│   └── README.md               # Dataset instructions
+│
 ├── notebooks/
 │   └── movie_recommendation.ipynb
-├── .streamlit/
-│   └── config.toml
-├── README.md
+│
+├── scripts/
+│   └── build_model.py          # Rebuild recommendation artifacts
+│
+├── movie_dict.pkl              # Processed movie metadata
+├── similarity_1.pkl            # Generated similarity matrix
+│
+├── .gitignore
 ├── requirements.txt
-└── .gitignore
-```
+└── README.md
+~~~
 
-The repository currently contains the movie metadata artifact `movie_dict.pkl`. The similarity matrix `similarity_1.pkl` is required by the application and must be generated from the notebook before deployment.
+> **Note:** `similarity_1.pkl` is generated by the model-building script and is currently required by the Streamlit application.
 
-## Installation
+---
 
-Clone the repository and install the dependencies:
+## 🚀 Run locally
 
-```bash
+### 1 · Install
+
+~~~bash
+git clone https://github.com/rohitsharma2408/dangerddrcrsys.git
+cd dangerddrcrsys
 pip install -r requirements.txt
-```
+~~~
 
-## TMDB API Configuration
+### 2 · Add the dataset
 
-The application does not store the TMDB API key in source code.
+Place:
 
-For local development, set an environment variable:
+~~~text
+data/
+├── tmdb_5000_movies.csv
+└── tmdb_5000_credits.csv
+~~~
 
-```bash
-# Windows PowerShell
+### 3 · Build the model
+
+~~~bash
+python scripts/build_model.py
+~~~
+
+This generates:
+
+~~~text
+movie_dict.pkl
+similarity_1.pkl
+~~~
+
+### 4 · Configure TMDB
+
+For local development, set:
+
+**Windows PowerShell**
+
+~~~powershell
 $env:TMDB_API_KEY="your_api_key"
+~~~
 
-# Linux/macOS
+**Linux / macOS**
+
+~~~bash
 export TMDB_API_KEY="your_api_key"
-```
+~~~
 
-For Streamlit deployment, use Streamlit secrets:
+For Streamlit deployment, use `.streamlit/secrets.toml`:
 
-```toml
+~~~toml
 TMDB_API_KEY = "your_api_key"
-```
+~~~
 
-Never commit `.streamlit/secrets.toml`.
+### 5 · Launch CineMatch
 
-## Running the Application
-
-After generating the required `similarity_1.pkl` artifact:
-
-```bash
+~~~bash
 streamlit run app/app.py
-```
+~~~
 
-## Model Artifacts
+---
 
-| Artifact | Purpose |
-|---|---|
-| `movie_dict.pkl` | Serialized movie metadata used by the application |
-| `similarity_1.pkl` | Pairwise cosine-similarity matrix required for recommendations |
+## 🛠️ Tech stack
 
-The similarity matrix is intentionally generated from the notebook rather than fabricated or replaced with a different algorithm.
+**Python** · **Pandas** · **NumPy** · **NLTK** · **Scikit-learn** · **Streamlit** · **Requests** · **TMDB API**
 
-## Example
+---
 
-For a movie such as `Batman Begins`, the original model produced recommendations including other Batman-related titles because their metadata representations are highly similar.
+## 🔭 Roadmap
 
-## Limitations
+- [ ] 🔎 Search-based movie selection
+- [ ] ⭐ Ratings and movie details
+- [ ] 🎭 Genre / actor / director filters
+- [ ] 💡 “Why was this recommended?” explanations
+- [ ] 🧹 Better duplicate-title handling
+- [ ] 🤝 Hybrid content + collaborative filtering
+- [ ] 📏 Recommendation evaluation metrics
+- [ ] 🚀 Cleaner production deployment
 
-- Recommendations depend entirely on available metadata.
-- The system is content-based and does not learn individual user preferences.
-- The similarity matrix scales quadratically with the number of movies.
-- Poster display depends on TMDB API availability and a valid API key.
-- Duplicate or very similar metadata can result in repetitive recommendations.
+---
 
-## Future Improvements
+<div align="center">
 
-- Add a reproducible model-generation script.
-- Automate creation of `similarity_1.pkl`.
-- Add automated tests.
-- Improve duplicate-title handling.
-- Add richer movie metadata to the interface.
-- Add deployment configuration.
-- Evaluate alternative text representations such as TF-IDF.
+### 🎬 Built by Rohit Sharma
 
-## Tech Stack
+**Machine Learning · Data Science · Computational Bioengineering**
 
-Python, Pandas, NumPy, Scikit-learn, NLTK, Streamlit, Requests, TMDB API.
-
-## Author
-
-Rohit Sharma
+</div>
