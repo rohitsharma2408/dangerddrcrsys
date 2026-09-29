@@ -12,10 +12,9 @@
   </style>
 </defs>
 <rect width="1400" height="820" rx="30" fill="url(#bg)"/>
-<text x="70" y="70" class="title">CineMatch · Recommendation Architecture</text>
+<text x="70" y="70" class="title">Movie Recommender System · Architecture</text>
 <text x="70" y="101" class="sub">From movie metadata to ranked recommendations — then enriched with TMDB posters.</text>
 
-<!-- model lane -->
 <rect x="55" y="145" width="1290" height="270" rx="24" fill="#11182a" stroke="#263352"/>
 <text x="85" y="180" class="tag">01 · MODEL BUILDING</text>
 
@@ -33,7 +32,7 @@
 
 <g filter="url(#shadow)">
 <rect x="590" y="215" width="205" height="145" rx="18" fill="url(#blue)"/>
-<text x="610" y="250" class="h">🔤 NLP</text><text x="610" y="278" class="p" fill="#eef2ff">Porter stemming</text><text x="610" y="302" class="p">CountVectorizer</text><text x="610" y="336" class="p">5,000 features</text>
+<text x="610" y="250" class="h">🔤 NLP</text><text x="610" y="278" class="p">Porter stemming</text><text x="610" y="302" class="p">CountVectorizer</text><text x="610" y="336" class="p">5,000 features</text>
 </g>
 <line x1="800" y1="287" x2="840" y2="287" stroke="#8491b5" stroke-width="3" marker-end="url(#arrow)"/>
 
@@ -48,7 +47,6 @@
 <text x="1130" y="250" class="h">💾 Artifacts</text><text x="1130" y="280" class="p">movie_dict.pkl</text><text x="1130" y="307" class="p">similarity_1.pkl</text><text x="1130" y="337" class="p">Ready for serving</text>
 </g>
 
-<!-- serving lane -->
 <rect x="55" y="455" width="1290" height="300" rx="24" fill="#11182a" stroke="#263352"/>
 <text x="85" y="490" class="tag">02 · APPLICATION / INFERENCE</text>
 
@@ -72,7 +70,7 @@
 
 <g filter="url(#shadow)">
 <rect x="895" y="525" width="410" height="165" rx="20" fill="#0e1424" stroke="#5b8cff" stroke-width="2"/>
-<text x="925" y="563" class="h">🎬 Streamlit · CineMatch</text>
+<text x="925" y="563" class="h">🎬 Streamlit · Movie Recommender System</text>
 <text x="925" y="595" class="p">Movie 1    Movie 2    Movie 3    Movie 4    Movie 5</text>
 <rect x="925" y="620" width="60" height="48" rx="7" fill="#293656"/><rect x="995" y="620" width="60" height="48" rx="7" fill="#293656"/><rect x="1065" y="620" width="60" height="48" rx="7" fill="#293656"/><rect x="1135" y="620" width="60" height="48" rx="7" fill="#293656"/><rect x="1205" y="620" width="60" height="48" rx="7" fill="#293656"/>
 </g>
