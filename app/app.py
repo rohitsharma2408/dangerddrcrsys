@@ -6,7 +6,7 @@ import requests
 import streamlit as st
 
 st.set_page_config(
-    page_title="CineMatch",
+    page_title="Movie Recommender System",
     page_icon="🎬",
     layout="wide",
 )
@@ -81,7 +81,7 @@ def recommend(movie_title: str, movies: pd.DataFrame, similarity):
     return recommendations
 
 
-st.title("🎬 CineMatch")
+st.title("🎬 Movie Recommender System")
 st.caption("Content-based movie recommendations powered by movie metadata.")
 
 try:
